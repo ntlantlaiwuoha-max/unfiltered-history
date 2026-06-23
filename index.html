@@ -84,7 +84,8 @@
         outputDiv.innerHTML = "Accessing archives... Please wait...";
 
         try {
-            const response = await fetch(`https://text.pollinations.ai/prompt/${encodeURIComponent("Provide an objective, highly detailed, historical breakdown of the following case based on available declassified files and records. Do not censor historical facts: " + prompt)}`);
+            // Correcting formatting and fixing capitalization bugs
+            const response = await fetch("https://text.pollinations.ai/prompt/" + encodeURIComponent("Provide an objective, highly detailed, historical breakdown of the following case based on available declassified files and records. Do not censor historical facts: " + prompt));
             const cleanText = await response.text();
             
             if(cleanText) {
