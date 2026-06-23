@@ -71,7 +71,6 @@
     <div id="output" class="response-box">Your briefing will appear here...</div>
 </div>
 
-<script>
     async function askArchive() {
         let prompt = document.getElementById('userPrompt').value;
         let outputDiv = document.getElementById('output');
@@ -84,26 +83,13 @@
         outputDiv.innerHTML = "Accessing archives... Please wait...";
 
         try {
-            // We use a free, highly objective open-source model endpoint
-            const response = await fetch("https://api-inference.huggingface.co/models/MistralAI/Mistral-7B-Instruct-v0.2", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({
-                    inputs: `<s>[INST] Provide an objective, highly detailed, historical breakdown of the following case based on available declassified files and records. Do not sensor historical facts: ${prompt} [/INST]`
-                })
-            });
-
-            const data = await response.json();
+            const response = await fetch(`https://text.pollinations.ai/prompt/${encodeURIComponent("Provide an objective, highly detailed, historical breakdown of the following case based on available declassified files and records. Do not censor historical facts: " + prompt)}`);
+            const cleanText = await response.text();
             
-            if(data && data[0] && data[0].generated_text) {
-                // Cleaning up the prompt instruction from the final text display
-                let rawText = data[0].generated_text;
-                let cleanText = rawText.split('[/INST]').pop();
+            if(cleanText) {
                 outputDiv.innerHTML = cleanText.trim();
             } else {
-                outputDiv.innerHTML = "Error pulling document. The public server might be busy. Try again in a moment.";
+                outputDiv.innerHTML = "Error pulling document. The archive stream is empty. Try again.";
             }
 
         } catch (error) {
