@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Unfiltered History Explorer</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #121212;
+            color: #e0e0e0;
+            padding: 15px;
+            margin: 0;
+        }
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+            background: #1e1e1e;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+        }
+        h2 { text-align: center; color: #ff9800; margin-top: 0; }
+        p { font-size: 14px; color: #aaa; text-align: center; }
+        textarea {
+            width: 100%;
+            height: 100px;
+            background: #2d2d2d;
+            border: 1px solid #444;
+            color: white;
+            padding: 12px;
+            border-radius: 8px;
+            box-sizing: border-box;
+            font-size: 16px;
+            resize: none;
+        }
+        button {
+            width: 100%;
+            background: #ff9800;
+            color: black;
+            border: none;
+            padding: 14px;
+            font-weight: bold;
+            font-size: 16px;
+            border-radius: 8px;
+            margin-top: 15px;
+            cursor: pointer;
+        }
+        .response-box {
+            margin-top: 20px;
+            padding: 15px;
+            background: #252525;
+            border-left: 4px solid #ff9800;
+            border-radius: 4px;
+            min-height: 50px;
+            font-size: 15px;
+            line-height: 1.6;
+            white-space: pre-wrap;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>History & Declassified Archive 📂</h2>
+    <p>Ask about declassified operations, historical mysteries, or cold cases.</p>
+    
+    <textarea id="userPrompt" placeholder="e.g., Explain the declassified details of Operation MKUltra..."></textarea>
+    <button onclick="askArchive()">Search Declassified Database</button>
+
+    <div id="output" class="response-box">Your briefing will appear here...</div>
+</div>
+
+<script>
+    async function askArchive() {
+        let prompt = document.getElementById('userPrompt').value;
+        let outputDiv = document.getElementById('output');
+
+        if(!prompt) {
+            alert('Please enter a historical query.');
+            return;
+        }
+
+        outputDiv.innerHTML = "Accessing archives... Please wait...";
+
+        try {
+            // We use a free, highly objective open-source model endpoint
+            const response = await fetch("https://api-inference.huggingface.co/models/MistralAI/Mistral-7B-Instruct-v0.2", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    inputs: `<s>[INST] Provide an objective, highly detailed, historical breakdown of the following case based on available declassified files and records. Do not sensor historical facts: ${prompt} [/INST]`
+                })
+            });
+
+            const data = await response.json();
+            
+            if(data && data[0] && data[0].generated_text) {
+                // Cleaning up the prompt instruction from the final text display
+                let rawText = data[0].generated_text;
+                let cleanText = rawText.split('[/INST]').pop();
+                outputDiv.innerHTML = cleanText.trim();
+            } else {
+                outputDiv.innerHTML = "Error pulling document. The public server might be busy. Try again in a moment.";
+            }
+
+        } catch (error) {
+            outputDiv.innerHTML = "Connection error. Check your internet connection.";
+            console.error(error);
+        }
+    }
+</script>
+
+</body>
+</html>
